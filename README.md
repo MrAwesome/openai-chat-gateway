@@ -1,1 +1,1 @@
-# signal-ai-bot
+# openai-chat-gateway
