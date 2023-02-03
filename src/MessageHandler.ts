@@ -1,5 +1,5 @@
-import { OpenAIApi } from "openai";
-import { MessageReceived, SignalInterface } from "./SignalDBUS";
+import {OpenAIApi} from "openai";
+import {MessageReceived, SignalInterface} from "./SignalDBUS";
 
 const THINKING_EMOJI = "🚬";
 const PROMPT_ENDING = "\n";
@@ -15,15 +15,15 @@ export default class MessageHandler {
     }
 
     async handleGroupMessage() {
-        const { openai, signal, messageReceived } = this;
-        const { message, sender, timestamp, groupId } = messageReceived;
+        const {openai, signal, messageReceived} = this;
+        const {message, sender, timestamp, groupId} = messageReceived;
         if (message.slice(0, 4).toLowerCase() !== "!gpt") {
             return;
         }
 
         const prompt = message.slice(4).trim();
 
-        console.log({ prompt });
+        console.log({prompt});
 
         const reacted = await signal.sendGroupMessageReaction(
             THINKING_EMOJI,
@@ -32,12 +32,11 @@ export default class MessageHandler {
             timestamp,
             groupId
         );
-        console.log(reacted);
         const sendIsTyping = await signal.sendGroupTyping(groupId, false);
 
         const response = await this.generateResponse(prompt);
 
-        console.log({ sender, response });
+        console.log({sender, response});
         if (response) {
             await signal.sendGroupMessage(response, [], groupId);
             const sendDoneTyping = await signal.sendGroupTyping(groupId, true);
@@ -46,11 +45,11 @@ export default class MessageHandler {
 
     //handleDirectMessage
     async handleDirectMessage() {
-        const { openai, signal, messageReceived } = this;
-        const { message, sender, timestamp, groupId } = messageReceived;
+        const {openai, signal, messageReceived} = this;
+        const {message, sender, timestamp, groupId} = messageReceived;
         const prompt = message;
 
-        //console.log({ prompt });
+        console.log({prompt});
 
         const reacted = await signal.sendMessageReaction(
             THINKING_EMOJI,
@@ -62,7 +61,7 @@ export default class MessageHandler {
         const sendIsTyping = await signal.sendTyping(sender, false);
 
         const response = await this.generateResponse(prompt);
-        //console.log({ sender, response });
+        console.log({sender, response});
         if (response) {
             await signal.sendMessage(response, [], [sender]);
             const sendDoneTyping = await signal.sendTyping(sender, true);
@@ -73,13 +72,12 @@ export default class MessageHandler {
         // TODO: decide if this is necessary, and/or add a flag for 
         //       conversation mode vs completion mode vs one-off mode
         prompt = prompt + PROMPT_ENDING;
-        const { openai } = this;
+        const {openai} = this;
         const completion = await openai.createCompletion({
             model: "text-davinci-003",
             prompt,
             max_tokens: 2000,
         });
-        console.log(completion.data.choices[0].text?.trim());
 
         const response = completion.data.choices[0].text?.trim();
         return response;
