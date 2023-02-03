@@ -1,9 +1,9 @@
-import { Configuration, OpenAIApi } from "openai";
+import {Configuration, OpenAIApi} from "openai";
 import dbus from "@quadratclown/dbus-next";
 import fs from "fs";
 
 import dotenv from "dotenv";
-import { SignalInterface } from "./SignalDBUS";
+import {SignalInterface} from "./SignalDBUS";
 import MessageHandler from "./MessageHandler";
 
 dotenv.config();

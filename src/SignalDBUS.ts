@@ -105,7 +105,7 @@ interface GroupMethods {
     getGroupMembers(groupId: ArrayBuffer): Promise<string[]>;
     joinGroup(inviteURI: string): Promise<void>;
     listGroups(): Promise<
-        Array<{ objectPath: string; groupId: ArrayBuffer; groupName: string }>
+        Array<{objectPath: string; groupId: ArrayBuffer; groupName: string}>
     >;
     sendGroupMessage(
         message: string,
@@ -130,7 +130,7 @@ interface DeviceMethods {
     addDevice(deviceUri: string): Promise<void>;
     getDevice(deviceId: number): Promise<string>;
     listDevices(): Promise<
-        Array<{ objectPath: string; id: number; name: string }>
+        Array<{objectPath: string; id: number; name: string}>
     >;
     sendContacts(): Promise<void>;
     sendSyncRequest(): Promise<void>;

@@ -4,6 +4,9 @@ import {MessageReceived, SignalInterface} from "./SignalDBUS";
 const THINKING_EMOJI = "🚬";
 const PROMPT_ENDING = "\n";
 
+const GROUP_PREFIX = "!gpt";
+const GROUP_PREFIX_LENGTH = GROUP_PREFIX.length;
+
 export default class MessageHandler {
     private isGroupMessage: boolean;
     constructor(
@@ -17,11 +20,14 @@ export default class MessageHandler {
     async handleGroupMessage() {
         const {openai, signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
-        if (message.slice(0, 4).toLowerCase() !== "!gpt") {
+        if (
+            message.slice(0, GROUP_PREFIX_LENGTH).toLowerCase() !== GROUP_PREFIX
+        ) {
             return;
         }
 
-        const prompt = message.slice(4).trim() + PROMPT_ENDING;
+        const prompt =
+            message.slice(GROUP_PREFIX_LENGTH).trim() + PROMPT_ENDING;
 
         console.log({prompt});
 
@@ -69,7 +75,7 @@ export default class MessageHandler {
     }
 
     async generateResponse(prompt: string): Promise<string | undefined> {
-        // TODO: decide if this is necessary, and/or add a flag for 
+        // TODO: decide if this is necessary, and/or add a flag for
         //       conversation mode vs completion mode vs one-off mode
         const {openai} = this;
         const completion = await openai.createCompletion({
