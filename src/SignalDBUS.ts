@@ -1,4 +1,7 @@
-export type SignalInterface = SignalControl & GeneralMethods & GroupMethods & DeviceMethods;
+export type SignalInterface = SignalControl &
+    GeneralMethods &
+    GroupMethods &
+    DeviceMethods;
 
 interface SignalControl {
     link(newDeviceName?: string): Promise<string>;
@@ -52,6 +55,44 @@ interface GeneralMethods {
         recipient: string,
         targetSentTimestamps: number[]
     ): Promise<void>;
+
+    sendViewedReceipt(
+        recipient: string,
+        targetSentTimestamp: number[]
+    ): Promise<void>;
+    sendRemoteDeleteMessage(
+        targetSentTimestamp: number,
+        recipient: string
+    ): Promise<number>;
+    sendRemoteDeleteMessage(
+        targetSentTimestamp: number,
+        recipients: string[]
+    ): Promise<number>;
+    sendTyping(recipient: string, stop: boolean): Promise<void>;
+    setContactBlocked(number: string, block: boolean): Promise<void>;
+    setContactName(number: string, name: string): Promise<void>;
+    deleteContact(number: string): Promise<void>;
+    deleteRecipient(number: string): Promise<void>;
+    setExpirationTimer(number: string, expiration: number): Promise<void>;
+    setPin(pin: string): Promise<void>;
+    submitRateLimitChallenge(challenge: string, captcha: string): Promise<void>;
+    updateProfile(
+        name: string,
+        about: string,
+        aboutEmoji: string,
+        avatar: string,
+        remove: boolean
+    ): Promise<void>;
+    updateProfile(
+        givenName: string,
+        familyName: string,
+        about: string,
+        aboutEmoji: string,
+        avatar: string,
+        remove: boolean
+    ): Promise<void>;
+    uploadStickerPack(stickerPackPath: string): Promise<string>;
+    version(): Promise<string>;
 }
 
 interface GroupMethods {
@@ -151,7 +192,7 @@ interface ReceiptReceived {
     sender: string;
 }
 
-interface MessageReceived {
+export interface MessageReceived {
     timestamp: number;
     sender: string;
     groupId: ArrayBuffer;
