@@ -21,7 +21,7 @@ export default class MessageHandler {
             return;
         }
 
-        const prompt = message.slice(4).trim();
+        const prompt = message.slice(4).trim() + PROMPT_ENDING;
 
         console.log({prompt});
 
@@ -32,14 +32,14 @@ export default class MessageHandler {
             timestamp,
             groupId
         );
-        const sendIsTyping = await signal.sendGroupTyping(groupId, false);
+        signal.sendGroupTyping(groupId, false);
 
         const response = await this.generateResponse(prompt);
 
         console.log({sender, response});
         if (response) {
             await signal.sendGroupMessage(response, [], groupId);
-            const sendDoneTyping = await signal.sendGroupTyping(groupId, true);
+            signal.sendGroupTyping(groupId, true);
         }
     }
 
@@ -47,7 +47,7 @@ export default class MessageHandler {
     async handleDirectMessage() {
         const {openai, signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
-        const prompt = message;
+        const prompt = message + PROMPT_ENDING;
 
         console.log({prompt});
 
@@ -58,20 +58,19 @@ export default class MessageHandler {
             timestamp,
             sender
         );
-        const sendIsTyping = await signal.sendTyping(sender, false);
+        signal.sendTyping(sender, false);
 
         const response = await this.generateResponse(prompt);
         console.log({sender, response});
         if (response) {
             await signal.sendMessage(response, [], [sender]);
-            const sendDoneTyping = await signal.sendTyping(sender, true);
+            await signal.sendTyping(sender, true);
         }
     }
 
     async generateResponse(prompt: string): Promise<string | undefined> {
         // TODO: decide if this is necessary, and/or add a flag for 
         //       conversation mode vs completion mode vs one-off mode
-        prompt = prompt + PROMPT_ENDING;
         const {openai} = this;
         const completion = await openai.createCompletion({
             model: "text-davinci-003",
