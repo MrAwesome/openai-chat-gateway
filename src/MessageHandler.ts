@@ -4,7 +4,6 @@ import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
 
 const THINKING_EMOJI = "🚬";
-const PROMPT_ENDING = "\n";
 
 const GROUP_PREFIX = "!gpt";
 const GROUP_PREFIX_LENGTH = GROUP_PREFIX.length;

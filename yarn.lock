@@ -33,9 +33,9 @@
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
 "@mrawesome/openai-cli@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.4.tgz#ccef92a7f5a5adcc7533e2d913be6f315a372c74"
-  integrity sha512-UTSR9fEkVzYEttDp3hN8FoldD2wHhKomWNRluqMOmOhDtDEYBZbtayRhMyCpkKEk7aR9zKPejRjOYy2yHtXEMQ==
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.5.tgz#cbd45cfb9caafb0656e68546d72d7e851805202d"
+  integrity sha512-zBrQZr4ZK6SfkPDo6oVNqIsiSF76lvCLuOGD8kBzAEt6nIGcEycR2dJz3YYuUsCo5tE3Ac3PgekK9mTaNpQN7Q==
   dependencies:
     "@types/node" "^18.11.18"
     commander "^10.0.0"
