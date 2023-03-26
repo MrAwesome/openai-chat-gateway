@@ -32,10 +32,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@mrawesome/openai-cli@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.3.tgz#fc72f4049f811331cd1a35d97caaee0840fafb35"
-  integrity sha512-egEy3uxMcUE6GWp0m3Tk8AeR5rnF0zAjlNAZaDtu1S40QJP449l/WTkHRcHNDJdjjYcxJpOzu1qy6vAQx2rFmA==
+"@mrawesome/openai-cli@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.4.tgz#ccef92a7f5a5adcc7533e2d913be6f315a372c74"
+  integrity sha512-UTSR9fEkVzYEttDp3hN8FoldD2wHhKomWNRluqMOmOhDtDEYBZbtayRhMyCpkKEk7aR9zKPejRjOYy2yHtXEMQ==
   dependencies:
     "@types/node" "^18.11.18"
     commander "^10.0.0"
