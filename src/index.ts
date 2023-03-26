@@ -8,6 +8,13 @@ import MessageHandler from "./MessageHandler";
 
 dotenv.config();
 
+const SERVER_ADMIN_CONTACT_INFO = process.env.SERVER_ADMIN_CONTACT_INFO;
+if (SERVER_ADMIN_CONTACT_INFO === undefined) {
+    console.log("You must set the environment variable SERVER_ADMIN_CONTACT_INFO!");
+    process.exit(1);
+}
+
+
 // TODO: figure out completions (complete the current text) vs. conversations
 
 async function getSignalInterface(): Promise<
@@ -45,7 +52,7 @@ async function getSignalInterface(): Promise<
         try {
             const [timestamp, sender, groupId, message, attachments] = args;
             console.log("Received message: ", message);
-            const handler = new MessageHandler(openai, signal, {
+            const handler = new MessageHandler(openai, signal, SERVER_ADMIN_CONTACT_INFO, {
                 timestamp,
                 sender,
                 groupId,

@@ -3,6 +3,8 @@
         "@quadratclown/dbus-next": "^1.0.2",
         "dotenv": "^16.0.3",
         "openai": "^3.1.0",
+        "openai-cli": "https://github.com/MrAwesome/openai-cli.git",
+        "string-argv": "^0.3.1",
         "ts-node": "^10.9.1",
         "typescript": "^4.9.5"
     },

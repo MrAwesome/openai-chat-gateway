@@ -1,5 +1,7 @@
 import {OpenAIApi} from "openai";
 import {MessageReceived, SignalInterface} from "./SignalDBUS";
+import {CLIRunner} from "openai-cli";
+import stringArgv from "string-argv";
 
 const THINKING_EMOJI = "🚬";
 const PROMPT_ENDING = "\n";
@@ -12,9 +14,15 @@ export default class MessageHandler {
     constructor(
         private openai: OpenAIApi,
         private signal: SignalInterface,
+        private serverAdminContactInfo: string,
         private messageReceived: MessageReceived
     ) {
         this.isGroupMessage = messageReceived.groupId.byteLength > 0;
+
+        this.handleGroupMessage = this.handleGroupMessage.bind(this);
+        this.handleDirectMessage = this.handleDirectMessage.bind(this);
+        this.parseAndRun = this.parseAndRun.bind(this);
+        this.run = this.run.bind(this);
     }
 
     async handleGroupMessage() {
@@ -26,10 +34,8 @@ export default class MessageHandler {
             return;
         }
 
-        const prompt =
-            message.slice(GROUP_PREFIX_LENGTH).trim() + PROMPT_ENDING;
-
-        console.log({prompt});
+        //const prompt = message.slice(GROUP_PREFIX_LENGTH).trim() + PROMPT_ENDING;
+        //console.log({prompt});
 
         const reacted = await signal.sendGroupMessageReaction(
             THINKING_EMOJI,
@@ -40,7 +46,10 @@ export default class MessageHandler {
         );
         signal.sendGroupTyping(groupId, false);
 
-        const response = await this.generateResponse(prompt);
+        const rawPrompt = message.slice(GROUP_PREFIX_LENGTH).trim();
+        console.log({rawPrompt});
+        const response = await this.parseAndRun(rawPrompt);
+        //const response = await this.generateResponse(prompt);
 
         console.log({sender, response});
         if (response) {
@@ -53,9 +62,8 @@ export default class MessageHandler {
     async handleDirectMessage() {
         const {openai, signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
-        const prompt = message + PROMPT_ENDING;
+        //const prompt = message + PROMPT_ENDING;
 
-        console.log({prompt});
 
         const reacted = await signal.sendMessageReaction(
             THINKING_EMOJI,
@@ -66,7 +74,10 @@ export default class MessageHandler {
         );
         signal.sendTyping(sender, false);
 
-        const response = await this.generateResponse(prompt);
+        const rawPrompt = message;
+        console.log({rawPrompt});
+        const response = await this.parseAndRun(rawPrompt);
+        //const response = await this.generateResponse(prompt);
         console.log({sender, response});
         if (response) {
             await signal.sendMessage(response, [], [sender]);
@@ -94,5 +105,39 @@ export default class MessageHandler {
         } else {
             return this.handleDirectMessage();
         }
+    }
+
+    // TODO: error handling
+    async parseAndRun(input: string): Promise<string | undefined> {
+        const {serverAdminContactInfo} = this;
+        // NOTE: openai-cli should probably handle this instead
+
+        const rawArgs = stringArgv(input);
+        const scriptContext = {
+            rawArgs,
+            isRemote: true,
+            serverAdminContactInfo,
+        };
+
+        const runner = new CLIRunner(scriptContext);
+        const res = await runner.run();
+        if (res.status === "success") {
+            console.log(res.output);
+            return res.output;
+        }
+        if (res.status === "failure_safe") {
+            console.error(res.stderr);
+        }
+        if (res.status === "failure_unsafe") {
+            console.error(res.error);
+            console.error(res.stderr);
+        }
+        if (res.status === "exit") {
+            console.log(res.output);
+        }
+
+        return undefined;
+        //process.exit(res.exitCode);
+
     }
 }
