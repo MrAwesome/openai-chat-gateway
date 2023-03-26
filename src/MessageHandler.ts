@@ -1,6 +1,6 @@
 import {OpenAIApi} from "openai";
 import {MessageReceived, SignalInterface} from "./SignalDBUS";
-import {CLIRunner} from "openai-cli";
+import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
 
 const THINKING_EMOJI = "🚬";
