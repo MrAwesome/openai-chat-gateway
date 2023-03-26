@@ -112,7 +112,7 @@ export default class MessageHandler {
         const {serverAdminContactInfo} = this;
         // NOTE: openai-cli should probably handle this instead
 
-        const rawArgs = stringArgv(input);
+        const rawArgs = ["openai-completion", ...stringArgv(input)];
         const scriptContext = {
             rawArgs,
             isRemote: true,
