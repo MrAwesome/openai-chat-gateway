@@ -48,9 +48,9 @@
     tar "^6.1.11"
 
 "@mrawesome/openai-cli@^0.1.4":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.6.tgz#bf338096e1de6dc10b010ab5f283c4f7d3276438"
-  integrity sha512-hynR3EdKXjYJ+NNm0VsHP8Udjjug4pfX3vKb1duC/Dkjnhkr5QwH/3DPuuv+T3b4no17u1bEGQFNiGYkl4jz4w==
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.7.tgz#4a7659356dac99b3faa1dc01d0e1957b9729e1c4"
+  integrity sha512-adu34BX0ORpONzDcK8ZuaiTC1iBnURgSh7pr9EPHEJ9DPeLsQiTNNEsPGtfPB/YEDmgMPleDc455mier8fcb+Q==
   dependencies:
     "@types/node" "^18.11.18"
     commander "^10.0.0"
