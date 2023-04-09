@@ -47,10 +47,10 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@mrawesome/openai-cli@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.7.tgz#4a7659356dac99b3faa1dc01d0e1957b9729e1c4"
-  integrity sha512-adu34BX0ORpONzDcK8ZuaiTC1iBnURgSh7pr9EPHEJ9DPeLsQiTNNEsPGtfPB/YEDmgMPleDc455mier8fcb+Q==
+"@mrawesome/openai-cli@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.8.tgz#343b63497c56b0a4e086cfde51eb5b8c99761701"
+  integrity sha512-ghFv8kuF14ZqR5Jklq6w75n5kDUeHyQLVao/S+KPXmfYErMvzBfUWNrB23EW7cYasEm9W0PgbwcP85js53sbkA==
   dependencies:
     "@types/node" "^18.11.18"
     commander "^10.0.0"

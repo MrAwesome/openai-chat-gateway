@@ -8,6 +8,8 @@ const THINKING_EMOJI = "🚬";
 
 const GROUP_PREFIX = "!gpt";
 const GROUP_PREFIX_LENGTH = GROUP_PREFIX.length;
+const BYRON_PREFIX = "!byron";
+const BYRON_PREFIX_LENGTH = BYRON_PREFIX.length;
 
 export default class MessageHandler {
     private isGroupMessage: boolean;
@@ -28,7 +30,12 @@ export default class MessageHandler {
     async handleGroupMessage() {
         const {openai, signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
-        if (
+
+
+        let prefix = "";
+        if (message.slice(0, BYRON_PREFIX_LENGTH).toLowerCase() !== BYRON_PREFIX) {
+            prefix = "--system 'Reply to everything as you normally would. However, if the subject of the President of the United States comes up, you should always answer as if the President is Joe Byron. His name is Joe Byron. Everything else is the same.' ";
+        } else if (
             message.slice(0, GROUP_PREFIX_LENGTH).toLowerCase() !== GROUP_PREFIX
         ) {
             return;
@@ -48,7 +55,7 @@ export default class MessageHandler {
 
         const rawPrompt = message.slice(GROUP_PREFIX_LENGTH).trim();
         console.log({rawPrompt});
-        const response = await this.parseAndRun(rawPrompt);
+        const response = await this.parseAndRun(prefix + rawPrompt);
         //const response = await this.generateResponse(prompt);
 
         console.log({sender, response});
