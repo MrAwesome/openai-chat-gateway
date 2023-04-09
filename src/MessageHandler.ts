@@ -34,7 +34,7 @@ export default class MessageHandler {
 
         let prefix = "";
         if (message.slice(0, BYRON_PREFIX_LENGTH).toLowerCase() === BYRON_PREFIX) {
-            prefix = "--system 'Reply to everything as you normally would. However, if the subject of the President of the United States comes up, you should always answer as if the President is Joe Byron. His name is Joe Byron. Everything else is the same.' ";
+            prefix = "--model gpt-4 --system 'Reply to everything as you normally would. However, if the subject of the President of the United States comes up, you should always answer as if the President is Joe Byron. His name is Joe Byron. Everything else is the same.' ";
         } else if (
             message.slice(0, GROUP_PREFIX_LENGTH).toLowerCase() !== GROUP_PREFIX
         ) {
