@@ -2,6 +2,7 @@ import {OpenAIApi} from "openai";
 import {MessageReceived, SignalInterface} from "./SignalDBUS";
 import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
+import {ScriptContext} from "@mrawesome/openai-cli/dist/types";
 
 const THINKING_EMOJI = "🚬";
 
@@ -112,7 +113,8 @@ export default class MessageHandler {
         // NOTE: openai-cli should probably handle this instead
 
         const rawArgs = ["openai-completion", ...stringArgv(input)];
-        const scriptContext = {
+        const scriptContext: ScriptContext = {
+            repoBaseDir: __dirname,
             rawArgs,
             isRemote: true,
             serverAdminContactInfo,

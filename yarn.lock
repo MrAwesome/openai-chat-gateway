@@ -47,7 +47,7 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@mrawesome/openai-cli@^0.1.4":
+"@mrawesome/openai-cli@^0.1.6":
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.7.tgz#4a7659356dac99b3faa1dc01d0e1957b9729e1c4"
   integrity sha512-adu34BX0ORpONzDcK8ZuaiTC1iBnURgSh7pr9EPHEJ9DPeLsQiTNNEsPGtfPB/YEDmgMPleDc455mier8fcb+Q==
