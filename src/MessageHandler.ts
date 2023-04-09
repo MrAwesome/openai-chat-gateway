@@ -33,12 +33,16 @@ export default class MessageHandler {
 
 
         let prefix = "";
+        let rawPrompt = "";
         if (message.slice(0, BYRON_PREFIX_LENGTH).toLowerCase() === BYRON_PREFIX) {
             prefix = "--model gpt-4 --system 'Reply to everything as you normally would. However, if the subject of the President of the United States comes up, you should always answer as if the President is Joe Byron. His name is Joe Byron. Everything else is the same.' ";
+            rawPrompt = message.slice(BYRON_PREFIX_LENGTH).trim();
         } else if (
             message.slice(0, GROUP_PREFIX_LENGTH).toLowerCase() !== GROUP_PREFIX
         ) {
             return;
+        } else {
+            rawPrompt = message.slice(GROUP_PREFIX_LENGTH).trim();
         }
 
         //const prompt = message.slice(GROUP_PREFIX_LENGTH).trim() + PROMPT_ENDING;
@@ -53,7 +57,6 @@ export default class MessageHandler {
         );
         signal.sendGroupTyping(groupId, false);
 
-        const rawPrompt = message.slice(GROUP_PREFIX_LENGTH).trim();
         console.log({rawPrompt});
         const response = await this.parseAndRun(prefix + rawPrompt);
         //const response = await this.generateResponse(prompt);
