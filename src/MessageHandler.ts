@@ -55,7 +55,7 @@ export default class MessageHandler {
             timestamp,
             groupId
         );
-        signal.sendGroupTyping(groupId, false);
+        await signal.sendGroupTyping(groupId, false);
 
         console.log({rawPrompt});
         const response = await this.parseAndRun(prefix + rawPrompt);
@@ -64,7 +64,7 @@ export default class MessageHandler {
         console.log({sender, response});
         if (response) {
             await signal.sendGroupMessage(response, [], groupId);
-            signal.sendGroupTyping(groupId, true);
+            await signal.sendGroupTyping(groupId, true);
         }
     }
 
@@ -82,7 +82,7 @@ export default class MessageHandler {
             timestamp,
             sender
         );
-        signal.sendTyping(sender, false);
+        await signal.sendTyping(sender, false);
 
         const rawPrompt = message;
         console.log({rawPrompt});
