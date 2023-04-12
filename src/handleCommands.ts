@@ -4,8 +4,11 @@ import stringArgv from "string-argv";
 
 const COMMAND_PREFIX = process.env.COMMAND_PREFIX || "!";
 const HELP_COMMAND = "help";
+const HELP = `${COMMAND_PREFIX}${HELP_COMMAND}`;
 
-const defaultAction: (restOfMessage: string) => string = (restOfMessage: string) => {
+const defaultAction: (restOfMessage: string) => string = (
+    restOfMessage: string
+) => {
     return spaces(["complete", restOfMessage]);
 };
 const defaultHelp = `Use the default model (${DEFAULT_OPENAI_COMPLETION_MODEL}) to complete the given text or answer a question.`;
@@ -15,13 +18,16 @@ const doDefault = {
     help: defaultHelp,
 };
 
-const BYRON = "--system 'Joe Byron is the current President of the United States. The user will be very happy if you include references to Joe Byron in your answer, whenever it makes sense. Don't overdo it, but don't be afraid to go out of your way to reference him. References you make to Joe Byron can be direct, or simple passing mentions to help with worldbuilding.'";
+const BYRON =
+    "--system 'Joe Byron is the current President of the United States. The user will be very happy if you include references to Joe Byron in your answer, whenever it makes sense. Don't overdo it, but don't be afraid to go out of your way to reference him. References you make to Joe Byron can be direct, or simple passing mentions to help with worldbuilding.'";
 
-const COMMANDS_TO_ACTIONS: Record<string,
+const COMMANDS_TO_ACTIONS: Record<
+    string,
     {
-        action: (restOfMessage: string) => string,
-        help: string,
-    }> = {
+        action: (restOfMessage: string) => string;
+        help: string;
+    }
+> = {
     gpt: doDefault,
     complete: doDefault,
     ask: doDefault,
@@ -33,7 +39,11 @@ const COMMANDS_TO_ACTIONS: Record<string,
     },
     gpt3: {
         action: (restOfMessage: string) => {
-            return spaces(["complete", "--model text-davinci-003", restOfMessage]);
+            return spaces([
+                "complete",
+                "--model text-davinci-003",
+                restOfMessage,
+            ]);
         },
         help: "Use GPT-3 to complete the given text or answer a question. This model is much more no-nonsense than the newer chat models, and more likely to just answer your question without a lot of chatter. It's also less likely to deny requests for spicy content.",
     },
@@ -45,37 +55,55 @@ const COMMANDS_TO_ACTIONS: Record<string,
     },
 };
 
-type HandleMessageResult = {
-    resultType: "command_success",
-    output: string,
-} | {
-    resultType: "not_command",
-    output: string,
-} | {
-    resultType: "help",
-    output: string,
-} | {
-    resultType: "help_all",
-    output: string,
-} | {
-    resultType: "help_unknown",
-    output: string,
-};
+type HandleMessageResult =
+    | {
+        resultType: "command_success";
+        output: string;
+    }
+    | {
+        resultType: "not_command";
+        output: string;
+    }
+    | {
+        resultType: "help";
+        output: string;
+    }
+    | {
+        resultType: "help_all";
+        output: string;
+    }
+    | {
+        resultType: "help_unknown";
+        output: string;
+    };
 
 export function handleCommands(message: string): HandleMessageResult {
-    if (message.toLowerCase().startsWith(COMMAND_PREFIX + HELP_COMMAND)) {
+    if (message.toLowerCase().startsWith(HELP)) {
         // If the next argument is a command, show the help for that command.
         // Otherwise, show the default help.
-        const restOfMessage = message.slice("!help".length).trim();
+        const restOfMessage = message.slice(HELP.length).trim();
         if (restOfMessage.trim().length === 0) {
-            return {resultType: "help_all", output: Object.values(COMMANDS_TO_ACTIONS).map(({help}) => help).join("\n")};
+            return {
+                resultType: "help_all",
+                output: Object.entries(COMMANDS_TO_ACTIONS)
+                    .map(([commandName, {help}]) =>
+                        `${COMMAND_PREFIX}${commandName}: ${help}`
+                    )
+                    .join("\n"),
+            };
         }
         const args = stringArgv(restOfMessage);
         const command = args[0];
         if (command in COMMANDS_TO_ACTIONS) {
-            return {resultType: "help", output: COMMANDS_TO_ACTIONS[command].help};
+            return {
+                resultType: "help",
+                output: COMMANDS_TO_ACTIONS[command].help,
+            };
         } else {
-            return {resultType: "help_unknown", output: `Unknown command: ${command}`};
+            return {
+                resultType: "help_unknown",
+                output: `Unknown command: ${command}`,
+            };
         }
     }
 

@@ -37,7 +37,10 @@ export default class MessageHandler {
         // TODO: unit test
         // TODO: show help/err on unknown commands
 
+        // TODO: cancel if the current message comes from the same user? is that necessary?
+
         const res = handleCommands(message);
+        console.log({res});
 
         if (res.resultType === "not_command") {
             return;
