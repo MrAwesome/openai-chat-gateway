@@ -1,20 +1,20 @@
-import {OpenAIApi} from "openai";
 import {MessageReceived, SignalInterface} from "./SignalDBUS";
 import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
 import {ScriptContext} from "@mrawesome/openai-cli/dist/types";
 
-const THINKING_EMOJI = "🚬";
+import dotenv from "dotenv";
+import {handleCommands} from "./handleCommands";
+dotenv.config();
 
-const GROUP_PREFIX = "!gpt";
-const GROUP_PREFIX_LENGTH = GROUP_PREFIX.length;
-const BYRON_PREFIX = "!byron";
-const BYRON_PREFIX_LENGTH = BYRON_PREFIX.length;
+const IN_PROGRESS_EMOJI = "🚬";
+
+
+// TODO: add help here
 
 export default class MessageHandler {
     private isGroupMessage: boolean;
     constructor(
-        private openai: OpenAIApi,
         private signal: SignalInterface,
         private serverAdminContactInfo: string,
         private messageReceived: MessageReceived
@@ -28,38 +28,39 @@ export default class MessageHandler {
     }
 
     async handleGroupMessage() {
-        const {openai, signal, messageReceived} = this;
+        const {signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
 
+        // TODO: move to function, and implement for individual commandline
+        // TODO: implement !help
+        // TODO: implement !help <command>
+        // TODO: unit test
+        // TODO: show help/err on unknown commands
 
-        let prefix = "";
-        let rawPrompt = "";
-        if (message.slice(0, BYRON_PREFIX_LENGTH).toLowerCase() === BYRON_PREFIX) {
-            prefix = "--model gpt-4 --system 'Reply to everything as you normally would. However, if the subject of the President of the United States comes up, you should always answer as if the President is Joe Byron. His name is Joe Byron. Everything else is the same.' ";
-            rawPrompt = message.slice(BYRON_PREFIX_LENGTH).trim();
-        } else if (
-            message.slice(0, GROUP_PREFIX_LENGTH).toLowerCase() !== GROUP_PREFIX
-        ) {
+        const res = handleCommands(message);
+
+        if (res.resultType === "not_command") {
             return;
-        } else {
-            rawPrompt = message.slice(GROUP_PREFIX_LENGTH).trim();
         }
 
-        //const prompt = message.slice(GROUP_PREFIX_LENGTH).trim() + PROMPT_ENDING;
-        //console.log({prompt});
+        if (res.resultType in ["help", "help_all", "help_unknown"]) {
+            await signal.sendGroupMessage(res.output, [], groupId);
+            return;
+        }
+        const commandResult = res.output;
 
         const reacted = await signal.sendGroupMessageReaction(
-            THINKING_EMOJI,
+            IN_PROGRESS_EMOJI,
             false,
             sender,
             timestamp,
             groupId
         );
-        await signal.sendGroupTyping(groupId, false);
+        const isTyping = await signal.sendGroupTyping(groupId, false);
 
-        console.log({rawPrompt});
-        const response = await this.parseAndRun(prefix + rawPrompt);
-        //const response = await this.generateResponse(prompt);
+        console.log({reacted, isTyping, commandResult});
+
+        const response = await this.parseAndRun(commandResult);
 
         console.log({sender, response});
         if (response) {
@@ -68,15 +69,15 @@ export default class MessageHandler {
         }
     }
 
-    //handleDirectMessage
+    // TODO: add support for commands, and just use a default command
     async handleDirectMessage() {
-        const {openai, signal, messageReceived} = this;
-        const {message, sender, timestamp, groupId} = messageReceived;
+        const {signal, messageReceived} = this;
+        const {message, sender, timestamp} = messageReceived;
         //const prompt = message + PROMPT_ENDING;
 
 
-        const reacted = await signal.sendMessageReaction(
-            THINKING_EMOJI,
+        await signal.sendMessageReaction(
+            IN_PROGRESS_EMOJI,
             false,
             sender,
             timestamp,
@@ -87,26 +88,11 @@ export default class MessageHandler {
         const rawPrompt = message;
         console.log({rawPrompt});
         const response = await this.parseAndRun(rawPrompt);
-        //const response = await this.generateResponse(prompt);
         console.log({sender, response});
         if (response) {
             await signal.sendMessage(response, [], [sender]);
             await signal.sendTyping(sender, true);
         }
-    }
-
-    async generateResponse(prompt: string): Promise<string | undefined> {
-        // TODO: decide if this is necessary, and/or add a flag for
-        //       conversation mode vs completion mode vs one-off mode
-        const {openai} = this;
-        const completion = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt,
-            max_tokens: 2000,
-        });
-
-        const response = completion.data.choices[0].text?.trim();
-        return response;
     }
 
     run() {
@@ -122,7 +108,7 @@ export default class MessageHandler {
         const {serverAdminContactInfo} = this;
         // NOTE: openai-cli should probably handle this instead
 
-        const rawArgs = ["openai-completion", ...stringArgv(input)];
+        const rawArgs = stringArgv(input);
         const scriptContext: ScriptContext = {
             repoBaseDir: __dirname,
             rawArgs,

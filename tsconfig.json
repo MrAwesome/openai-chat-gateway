@@ -16,6 +16,6 @@
         "noImplicitAny": true,
         "moduleResolution": "node",
         "outDir": "dist/",
-        "types": ["node"]
+        "types": ["node", "jest"]
     }
 }

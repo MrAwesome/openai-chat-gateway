@@ -1,6 +1,4 @@
-import {Configuration, OpenAIApi} from "openai";
 import dbus from "@quadratclown/dbus-next";
-import fs from "fs";
 
 import dotenv from "dotenv";
 import {SignalInterface} from "./SignalDBUS";
@@ -21,7 +19,6 @@ async function getSignalInterface(): Promise<
     SignalInterface & dbus.ClientInterface
 > {
     const bus = dbus.sessionBus();
-    const Variant = dbus.Variant;
 
     // getting an object introspects it on the bus and creates the interfaces
     const obj = await bus.getProxyObject(
@@ -34,12 +31,7 @@ async function getSignalInterface(): Promise<
 }
 
 (async () => {
-    const apiKey = process.env.OPENAI_API_KEY!;
     const signal = await getSignalInterface();
-    const configuration = new Configuration({
-        apiKey,
-    });
-    const openai = new OpenAIApi(configuration);
 
     //console.log("name: ", signal.$name);
     //console.log("path: ", signal.$path);
@@ -52,7 +44,7 @@ async function getSignalInterface(): Promise<
         try {
             const [timestamp, sender, groupId, message, attachments] = args;
             console.log("Received message: ", message);
-            const handler = new MessageHandler(openai, signal, SERVER_ADMIN_CONTACT_INFO, {
+            const handler = new MessageHandler(signal, SERVER_ADMIN_CONTACT_INFO, {
                 timestamp,
                 sender,
                 groupId,
