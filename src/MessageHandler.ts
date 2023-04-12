@@ -46,7 +46,7 @@ export default class MessageHandler {
             return;
         }
 
-        if (res.resultType in ["help", "help_all", "help_unknown"]) {
+        if (["help", "help_all", "help_unknown"].includes(res.resultType)) {
             await signal.sendGroupMessage(res.output, [], groupId);
             return;
         }

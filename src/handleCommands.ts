@@ -97,12 +97,12 @@ export function handleCommands(message: string): HandleMessageResult {
         if (command in COMMANDS_TO_ACTIONS) {
             return {
                 resultType: "help",
-                output: COMMANDS_TO_ACTIONS[command].help,
+                output: `${COMMAND_PREFIX}${command}: ${COMMANDS_TO_ACTIONS[command].help}`,
             };
         } else {
             return {
                 resultType: "help_unknown",
-                output: `Unknown command: ${command}`,
+                output: `Unknown command: ${COMMAND_PREFIX}${command}`,
             };
         }
     }
