@@ -1,6 +1,8 @@
 import {DEFAULT_OPENAI_COMPLETION_MODEL} from "@mrawesome/openai-cli/dist/defaultSettings";
-import {joinWithSpacesIfNoneAlreadyPresent as spaces} from "./utils";
 import stringArgv from "string-argv";
+
+import {joinWithSpacesIfNoneAlreadyPresent as spaces} from "./utils";
+import {getByron} from "./customCommands/byron";
 
 const COMMAND_PREFIX = process.env.COMMAND_PREFIX || "!";
 const HELP_COMMAND = "help";
@@ -17,9 +19,6 @@ const doDefault = {
     action: defaultAction,
     help: defaultHelp,
 };
-
-const BYRON =
-    "--system 'Joe Byron is the current President of the United States. The user will be very happy if you include references to Joe Byron in your answer, whenever it makes sense. Don't overdo it, but don't be afraid to go out of your way to reference him. References you make to Joe Byron can be direct, or simple passing mentions to help with worldbuilding.'";
 
 const COMMANDS_TO_ACTIONS: Record<
     string,
@@ -49,7 +48,7 @@ const COMMANDS_TO_ACTIONS: Record<
     },
     byron: {
         action: (restOfMessage: string) => {
-            return spaces(["complete", "--model gpt-4", BYRON, restOfMessage]);
+            return spaces(["complete", "--model gpt-4", getByron(), restOfMessage]);
         },
         help: "Use the GPT-4 model to complete prompts in the Joe Byron universe.",
     },
