@@ -7,10 +7,10 @@ import dotenv from "dotenv";
 import {handleCommands} from "./handleCommands";
 dotenv.config();
 
+// TODO: handle unknown options etc (handle commander errors, return them as safe)
+
+// TODO: have a failed/passed emoji that you switch to
 const IN_PROGRESS_EMOJI = "🚬";
-
-
-// TODO: add help here
 
 export default class MessageHandler {
     private isGroupMessage: boolean;
@@ -61,7 +61,7 @@ export default class MessageHandler {
         );
         const isTyping = await signal.sendGroupTyping(groupId, false);
 
-        console.log({reacted, isTyping, commandResult});
+        console.log({reacted, isTyping});
 
         const response = await this.parseAndRun(commandResult);
 
