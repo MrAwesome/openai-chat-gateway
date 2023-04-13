@@ -10,7 +10,7 @@ export function getByron(attitudeOverride?: number) {
     //} else if (attitudeChoice < 0.4) {
         //attitude = "You are confused why so many people mention Joe Byron so often. He seems like a good guy, but you don't really understand why he is so important.";
     } else {
-        attitude = "Refer to Joe Byron as if he were 'Diamond Joe' Biden, from The Onion's many articles about that character. Feel free to refer to specific escapades from those articles, just refer to them as if they were real, and use the name 'Joe Byron' or 'Diamond Joe' instead of 'Joe Biden'. If at all possible, refer directly to some of his adventures and hijinks from those Onion articles as if they really happened. Do NOT mention The Onion. Do NOT mention that Joe Byron is a fictional character. Act as if Joe Byron, and the Onion articles about him, are real.";
+        attitude = "Refer to Joe Byron as if he were 'Diamond Joe' Biden, from The Onion's many articles about that character. Feel free to refer to specific escapades from those articles, just refer to them as if they were real, and use the name 'Joe Byron' or 'Diamond Joe' instead of 'Joe Biden'. If at all possible, refer to some of his adventures and hijinks from those Onion articles as if they really happened. If you can make these references subtly, as if they're common knowledge, without explicit detail, that's best. Do NOT mention The Onion. Do NOT mention that Joe Byron is a fictional character. Act as if Joe Byron, and the Onion articles about him, are real.";
     }
 
     // Should be a bell curve:
