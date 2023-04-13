@@ -3,7 +3,6 @@ import stringArgv from "string-argv";
 
 import {joinWithSpacesIfNoneAlreadyPresent as spaces} from "./utils";
 import {getByron} from "./customCommands/byron";
-import {getGod} from "./customCommands/god";
 
 const COMMAND_PREFIX = process.env.COMMAND_PREFIX || "!";
 const HELP_COMMAND = "help";
@@ -53,14 +52,6 @@ const COMMANDS_TO_ACTIONS: Record<
         },
         help: "Use the GPT-4 model to complete prompts in the Joe Byron universe.",
     },
-    god: {
-        action: (restOfMessage: string) => {
-            return spaces(["complete", "--model gpt-4", 
-                          getGod(),
-                          restOfMessage]);
-        },
-        help: "Try to answer using an unlocked GPT-4 model, which answers more directly with fewer safety filters.",
-    }
 };
 
 type HandleMessageResult =
