@@ -10,9 +10,7 @@ const HELP = `${COMMAND_PREFIX}${HELP_COMMAND}`;
 
 const defaultAction: (restOfMessage: string) => string = (
     restOfMessage: string
-) => {
-    return spaces(["complete", restOfMessage]);
-};
+) => spaces(["complete", restOfMessage]);
 const defaultHelp = `Use the default model (${DEFAULT_OPENAI_COMPLETION_MODEL}) to complete the given text or answer a question.`;
 
 const doDefault = {
@@ -77,6 +75,7 @@ type HandleMessageResult =
     };
 
 export function handleCommands(message: string): HandleMessageResult {
+    // Handle !help and !help <command>
     if (message.toLowerCase().startsWith(HELP)) {
         // If the next argument is a command, show the help for that command.
         // Otherwise, show the default help.
@@ -101,11 +100,12 @@ export function handleCommands(message: string): HandleMessageResult {
         } else {
             return {
                 resultType: "help_unknown",
-                output: `Unknown command: ${COMMAND_PREFIX}${command}`,
+                output: `Unknown command: ${COMMAND_PREFIX}${command}. Type !help to see all available commands.`,
             };
         }
     }
 
+    // Check for, and run, commands
     for (const command of Object.keys(COMMANDS_TO_ACTIONS)) {
         const cmdPrefix = COMMAND_PREFIX + command.toLowerCase();
         if (message.toLowerCase().startsWith(cmdPrefix)) {
@@ -115,5 +115,14 @@ export function handleCommands(message: string): HandleMessageResult {
             return {resultType: "command_success", output: commandResult};
         }
     }
+
+    // If the user typed a command that doesn't exist, tell them
+    if (message.startsWith(COMMAND_PREFIX)) {
+        return {
+            resultType: "help_unknown",
+            output: `Unknown command: ${message.split(" ")[0]}. Type !help to see all available commands.`,
+        };
+    }
+
     return {resultType: "not_command", output: ""};
 }

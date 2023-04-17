@@ -1,3 +1,5 @@
+import type {Variant} from "@quadratclown/dbus-next";
+
 export type SignalInterface = SignalControl &
     GeneralMethods &
     GroupMethods &
@@ -197,5 +199,39 @@ export interface MessageReceived {
     sender: string;
     groupId: ArrayBuffer;
     message: string;
-    attachments: string[];
+    attachments: string[]; // list of filename paths
+}
+
+export interface MessageReceivedV2 {
+    timestamp: number;
+    sender: string;
+    groupId: ArrayBuffer;
+    message: string;
+    extras: MessageV2Extras;
+}
+
+// NOTE: more fields may be added in the future, this is definitely the most likely place to see changes in types
+
+interface MessageV2Extras {
+  attachments?: Variant<Array<AttachmentFileInfo>>;
+  mentions?: Variant<Array<Record<string, Variant<any>>>>;
+  quote?: Variant<Record<string, Variant<any>>>;
+  reaction?: Variant<Record<string, Variant<any>>>;
+  remoteDelete?: Variant<Record<string, Variant<any>>>;
+  sticker?: Variant<Record<string, Variant<any>>>;
+
+  // These two seem to always be provided, but we won't rely on that.
+  expiresInSeconds?: Variant<number>;
+  isViewOnce?: Variant<boolean>;
+}
+
+interface AttachmentFileInfo {
+  fileName: Variant<string>;
+  file: Variant<string>;
+  isBorderless: Variant<boolean>;
+  size: Variant<string>;
+  isVoiceNote: Variant<boolean>;
+  isGif: Variant<boolean>;
+  contentType: Variant<string>;
+  remoteId: Variant<string>;
 }

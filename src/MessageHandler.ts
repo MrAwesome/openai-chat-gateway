@@ -1,23 +1,29 @@
-import {MessageReceived, SignalInterface} from "./SignalDBUS";
+import {MessageReceivedV2, SignalInterface} from "./SignalDBUS";
 import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
-import {ScriptContext} from "@mrawesome/openai-cli/dist/types";
+import {ScriptContext, ScriptReturn} from "@mrawesome/openai-cli/dist/types";
 
 import dotenv from "dotenv";
 import {handleCommands} from "./handleCommands";
+import {ReactWithEmoji, RespondWithMessage, TypingAction} from "./types";
 dotenv.config();
 
-// TODO: handle unknown options etc (handle commander errors, return them as safe)
+// TODO: have answers be sent as responses to the message that triggered them
+// TODO: handle emoji responses to messages
 
-// TODO: have a failed/passed emoji that you switch to
 const IN_PROGRESS_EMOJI = "🚬";
+const SUCCESS_EMOJI = "✅";
+const SAFE_FAILURE_EMOJI = "❌";
+const UNSAFE_FAILURE_EMOJI = "⁉️";
+const EXPECTED_EXIT_EMOJI = "🎓";
+const COMMAND_HELP_EMOJI = "📖";
 
 export default class MessageHandler {
     private isGroupMessage: boolean;
     constructor(
         private signal: SignalInterface,
         private serverAdminContactInfo: string,
-        private messageReceived: MessageReceived
+        private messageReceived: MessageReceivedV2
     ) {
         this.isGroupMessage = messageReceived.groupId.byteLength > 0;
 
@@ -31,70 +37,108 @@ export default class MessageHandler {
         const {signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
 
+        const respondWithMessage: RespondWithMessage = async (message: string) => {
+            signal.sendGroupMessage(message, [], groupId);
+        };
+        const reactWithEmoji: ReactWithEmoji = async (emoji: string) => {
+            signal.sendGroupMessageReaction(emoji, false, sender, timestamp, groupId);
+        };
+        const typingAction: TypingAction = async (action: "start_typing" | "stop_typing") => {
+            const stopTyping = action !== "start_typing";
+            signal.sendGroupTyping(groupId, stopTyping);
+        };
+
         // TODO: move to function, and implement for individual commandline
-        // TODO: implement !help
-        // TODO: implement !help <command>
         // TODO: unit test
         // TODO: show help/err on unknown commands
-
         // TODO: cancel if the current message comes from the same user? is that necessary?
 
-        const res = handleCommands(message);
-        console.log({res});
+        const commandResult = handleCommands(message);
+        console.log({commandResult});
 
-        if (res.resultType === "not_command") {
+        if (commandResult.resultType === "not_command") {
             return;
         }
 
-        if (["help", "help_all", "help_unknown"].includes(res.resultType)) {
-            await signal.sendGroupMessage(res.output, [], groupId);
+        if (["help", "help_all", "help_unknown"].includes(commandResult.resultType)) {
+            respondWithMessage(commandResult.output);
+            reactWithEmoji(COMMAND_HELP_EMOJI);
             return;
         }
-        const commandResult = res.output;
 
-        const reacted = await signal.sendGroupMessageReaction(
-            IN_PROGRESS_EMOJI,
-            false,
-            sender,
-            timestamp,
-            groupId
+        return await this.handleMessageInner(
+            commandResult.output,
+            reactWithEmoji,
+            respondWithMessage,
+            typingAction,
         );
-        const isTyping = await signal.sendGroupTyping(groupId, false);
-
-        console.log({reacted, isTyping});
-
-        const response = await this.parseAndRun(commandResult);
-
-        console.log({sender, response});
-        if (response) {
-            await signal.sendGroupMessage(response, [], groupId);
-            await signal.sendGroupTyping(groupId, true);
-        }
     }
 
     // TODO: add support for commands, and just use a default command
     async handleDirectMessage() {
         const {signal, messageReceived} = this;
         const {message, sender, timestamp} = messageReceived;
-        //const prompt = message + PROMPT_ENDING;
 
+        const reactWithEmoji: ReactWithEmoji = async (emoji: string) => {
+            signal.sendMessageReaction(
+                emoji,
+                false,
+                sender,
+                timestamp,
+                sender
+            );
+        };
 
-        await signal.sendMessageReaction(
-            IN_PROGRESS_EMOJI,
-            false,
-            sender,
-            timestamp,
-            sender
+        const respondWithMessage: RespondWithMessage = async (message: string) => {
+            signal.sendMessage(message, [], [sender]);
+        };
+
+        const typingAction: TypingAction = async (action: "start_typing" | "stop_typing") => {
+            const stopTyping = action !== "start_typing";
+            signal.sendTyping(sender, stopTyping);
+        };
+
+        return await this.handleMessageInner(
+            message,
+            reactWithEmoji,
+            respondWithMessage,
+            typingAction,
         );
-        await signal.sendTyping(sender, false);
+    }
 
-        const rawPrompt = message;
-        console.log({rawPrompt});
-        const response = await this.parseAndRun(rawPrompt);
-        console.log({sender, response});
-        if (response) {
-            await signal.sendMessage(response, [], [sender]);
-            await signal.sendTyping(sender, true);
+    async handleMessageInner(
+        message: string,
+        reactWithEmoji: ReactWithEmoji,
+        respondWithMessage: RespondWithMessage,
+        typingAction: TypingAction
+    ) {
+        // TODO: do you need to await here? almost certainly not
+        reactWithEmoji(IN_PROGRESS_EMOJI);
+        typingAction("start_typing");
+
+        try {
+            const rawPrompt = message;
+            const response = await this.parseAndRun(rawPrompt);
+
+            // TODO: handle errors, unit test
+            if (response.status === "success") {
+                respondWithMessage(response.output);
+                reactWithEmoji(SUCCESS_EMOJI);
+            } else if (response.status === "exit") {
+                respondWithMessage(response.output);
+                reactWithEmoji(EXPECTED_EXIT_EMOJI);
+            } else if (response.status === "failure_safe") {
+                respondWithMessage(response.stderr);
+                reactWithEmoji(SAFE_FAILURE_EMOJI);
+            } else if (response.status === "failure_unsafe") {
+                // TODO: respond with a generic error message and link to admin contact info
+                reactWithEmoji(UNSAFE_FAILURE_EMOJI);
+            }
+
+            typingAction("stop_typing");
+        } catch (e) {
+            await reactWithEmoji(UNSAFE_FAILURE_EMOJI);
+            await typingAction("stop_typing");
         }
     }
 
@@ -106,11 +150,10 @@ export default class MessageHandler {
         }
     }
 
-    // TODO: error handling
-    async parseAndRun(input: string): Promise<string | undefined> {
+    async parseAndRun(input: string): Promise<ScriptReturn> {
         const {serverAdminContactInfo} = this;
-        // NOTE: openai-cli should probably handle this instead
 
+        // NOTE: openai-cli should probably handle this instead
         const rawArgs = stringArgv(input);
         const scriptContext: ScriptContext = {
             repoBaseDir: __dirname,
@@ -123,21 +166,18 @@ export default class MessageHandler {
         const res = await runner.run();
         if (res.status === "success") {
             console.log(res.output);
-            return res.output;
         }
         if (res.status === "failure_safe") {
             console.error(res.stderr);
         }
         if (res.status === "failure_unsafe") {
-            console.error(res.error);
+            console.error("[!!!] UNSAFE ERROR ENCOUNTERED: ", res.error);
             console.error(res.stderr);
         }
         if (res.status === "exit") {
             console.log(res.output);
         }
 
-        return undefined;
-        //process.exit(res.exitCode);
-
+        return res;
     }
 }

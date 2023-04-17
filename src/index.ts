@@ -1,7 +1,7 @@
 import dbus from "@quadratclown/dbus-next";
 
 import dotenv from "dotenv";
-import {SignalInterface} from "./SignalDBUS";
+import {MessageReceivedV2, SignalInterface} from "./SignalDBUS";
 import MessageHandler from "./MessageHandler";
 
 dotenv.config();
@@ -12,8 +12,8 @@ if (SERVER_ADMIN_CONTACT_INFO === undefined) {
     process.exit(1);
 }
 
-
 // TODO: figure out completions (complete the current text) vs. conversations
+// TODO: allow for txt attachment files to be completed/edited
 
 async function getSignalInterface(): Promise<
     SignalInterface & dbus.ClientInterface
@@ -39,20 +39,28 @@ async function getSignalInterface(): Promise<
     //console.log("properties: ", signal.$properties);
     //console.log("methods: ", signal.$methods);
     //console.log("signals: ", signal.$signals);
+    //console.log("listeners: ", signal.$listeners);
 
-    signal.on("MessageReceived", async (...args) => {
+    // TODO: validate the incoming message with Zod, and if it doesn't match the schema, throw an error
+    signal.on("MessageReceivedV2", async (...args) => {
         try {
-            const [timestamp, sender, groupId, message, attachments] = args;
-            console.log("Received message: ", message);
-            const handler = new MessageHandler(signal, SERVER_ADMIN_CONTACT_INFO, {
+            const [timestamp, sender, groupId, message, extras] = args;
+            const messageReceivedV2: MessageReceivedV2 = {
                 timestamp,
                 sender,
                 groupId,
                 message,
-                attachments,
-            });
+                extras,
+            };
+            //const attachments = messageReceivedV2.extras.attachments;
+            //JSON.stringify(attachments, (_key, value) => typeof value === 'bigint' ? value.toString() : value, 2);
+
+            const handler = new MessageHandler(signal, SERVER_ADMIN_CONTACT_INFO, messageReceivedV2);
             // TODO: can this call be async? does awaiting here block future calls?
-            await handler.run();
+            console.log(`Handling message: "${messageReceivedV2.message}"`);
+            handler.run()
+                .then(() => console.log(`Finished handling message: "${messageReceivedV2.message}"`))
+                .catch((e) => console.error(e));
         } catch (e) {
             console.error(e);
         }
