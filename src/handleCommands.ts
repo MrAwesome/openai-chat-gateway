@@ -107,7 +107,7 @@ export function handleCommands(message: string): HandleMessageResult {
     }
 
     for (const command of Object.keys(COMMANDS_TO_ACTIONS)) {
-        const cmdPrefix = COMMAND_PREFIX + command;
+        const cmdPrefix = COMMAND_PREFIX + command.toLowerCase();
         if (message.toLowerCase().startsWith(cmdPrefix)) {
             const restOfMessage = message.slice(cmdPrefix.length);
             const {action} = COMMANDS_TO_ACTIONS[command];
