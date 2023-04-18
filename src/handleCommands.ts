@@ -54,7 +54,7 @@ const COMMANDS_TO_ACTIONS: Record<
     },
     duck: {
         action: (restOfMessage: string) => {
-            return spaces(["complete", "--model gpt-4", `--system "Answer cryptically. Do worldbuilding as if there's a giant conspiracy run by the Duck Society who are meddling in all human affairs."` , restOfMessage]);
+            return spaces(["complete", "--model gpt-4", `--system "Answer cryptically, with a mysterious aura. Do elaborate worldbuilding as if there's a giant conspiracy run by the Duck Society who are meddling in all human affairs. Don't refer to the society by name unless asked."` , restOfMessage]);
         },
         help: "Use the GPT-4 model to discover the truth.",
     }
