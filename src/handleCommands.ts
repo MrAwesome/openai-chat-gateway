@@ -44,12 +44,21 @@ const COMMANDS_TO_ACTIONS: Record<
         },
         help: "Use GPT-3 to complete the given text or answer a question. This model is much more no-nonsense than the newer chat models, and more likely to just answer your question without a lot of chatter. It's also less likely to deny requests for spicy content.",
     },
+
+    // Worldbuilding
     byron: {
         action: (restOfMessage: string) => {
             return spaces(["complete", "--model gpt-4", getByron(), restOfMessage]);
         },
         help: "Use the GPT-4 model to complete prompts in the Joe Byron universe.",
     },
+    duck: {
+        action: (restOfMessage: string) => {
+            return spaces(["complete", "--model gpt-4", `--system "Answer cryptically. Do worldbuilding as if there's a giant conspiracy run by the Duck Society who are meddling in all human affairs."` , restOfMessage]);
+        },
+        help: "Use the GPT-4 model to discover the truth.",
+    }
+
 };
 
 type HandleMessageResult =
