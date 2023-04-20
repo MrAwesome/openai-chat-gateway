@@ -5,7 +5,7 @@ import {ScriptContext, ScriptReturn} from "@mrawesome/openai-cli/dist/types";
 
 import dotenv from "dotenv";
 import {handleCommands} from "./handleCommands";
-import {ReactWithEmoji, RespondWithMessage, TypingAction} from "./types";
+import {safeAsync, SafeAsyncChatActions} from "./handlers/types";
 dotenv.config();
 
 // TODO: have answers be sent as responses to the message that triggered them
@@ -18,7 +18,7 @@ const UNSAFE_FAILURE_EMOJI = "⁉️";
 const EXPECTED_EXIT_EMOJI = "🎓";
 const COMMAND_HELP_EMOJI = "📖";
 
-export default class MessageHandler {
+export default class SignalMessageHandler {
     private isGroupMessage: boolean;
     constructor(
         private signal: SignalInterface,
@@ -36,17 +36,33 @@ export default class MessageHandler {
     async handleGroupMessage() {
         const {signal, messageReceived} = this;
         const {message, sender, timestamp, groupId} = messageReceived;
+        const prefix = "signal.group.";
 
-        const respondWithMessage: RespondWithMessage = async (message: string) => {
-            signal.sendGroupMessage(message, [], groupId);
-        };
-        const reactWithEmoji: ReactWithEmoji = async (emoji: string) => {
-            signal.sendGroupMessageReaction(emoji, false, sender, timestamp, groupId);
-        };
-        const typingAction: TypingAction = async (action: "start_typing" | "stop_typing") => {
-            const stopTyping = action !== "start_typing";
-            signal.sendGroupTyping(groupId, stopTyping);
-        };
+        const respondWithMessage = safeAsync(
+            prefix + "respondWithMessage",
+            async (message: string) => {
+                signal.sendGroupMessage(message, [], groupId);
+            }
+        );
+        const reactWithEmoji = safeAsync(
+            prefix + "reactWithEmoji",
+            async (emoji: string) => {
+                signal.sendGroupMessageReaction(
+                    emoji,
+                    false,
+                    sender,
+                    timestamp,
+                    groupId
+                );
+            }
+        );
+        const typingAction = safeAsync(
+            prefix + "typingAction",
+            async (action: "start_typing" | "stop_typing") => {
+                const stopTyping = action !== "start_typing";
+                signal.sendGroupTyping(groupId, stopTyping);
+            }
+        );
 
         // TODO: move to function, and implement for individual commandline
         // TODO: unit test
@@ -60,58 +76,70 @@ export default class MessageHandler {
             return;
         }
 
-        if (["help", "help_all", "help_unknown"].includes(commandResult.resultType)) {
+        if (
+            ["help", "help_all", "help_unknown"].includes(
+                commandResult.resultType
+            )
+        ) {
             respondWithMessage(commandResult.output);
             reactWithEmoji(COMMAND_HELP_EMOJI);
             return;
         }
 
-        return await this.handleMessageInner(
-            commandResult.output,
+        return await this.handleMessageInner(message, {
             reactWithEmoji,
             respondWithMessage,
             typingAction,
-        );
+        });
     }
 
     // TODO: add support for commands, and just use a default command
     async handleDirectMessage() {
         const {signal, messageReceived} = this;
         const {message, sender, timestamp} = messageReceived;
+        const prefix = "signal.direct.";
 
-        const reactWithEmoji: ReactWithEmoji = async (emoji: string) => {
-            signal.sendMessageReaction(
-                emoji,
-                false,
-                sender,
-                timestamp,
-                sender
-            );
-        };
+        const reactWithEmoji = safeAsync(
+            prefix + "reactWithEmoji",
+            async (emoji: string) => {
+                signal.sendMessageReaction(
+                    emoji,
+                    false,
+                    sender,
+                    timestamp,
+                    sender
+                );
+            }
+        );
 
-        const respondWithMessage: RespondWithMessage = async (message: string) => {
-            signal.sendMessage(message, [], [sender]);
-        };
+        const respondWithMessage = safeAsync(
+            prefix + "respondWithMessage",
+            async (message: string) => {
+                signal.sendMessage(message, [], [sender]);
+            }
+        );
 
-        const typingAction: TypingAction = async (action: "start_typing" | "stop_typing") => {
-            const stopTyping = action !== "start_typing";
-            signal.sendTyping(sender, stopTyping);
-        };
+        const typingAction = safeAsync(
+            prefix + "typingAction",
+            async (action: "start_typing" | "stop_typing") => {
+                const stopTyping = action !== "start_typing";
+                signal.sendTyping(sender, stopTyping);
+            }
+        );
 
-        return await this.handleMessageInner(
-            message,
+        return await this.handleMessageInner(message, {
             reactWithEmoji,
             respondWithMessage,
             typingAction,
-        );
+        });
     }
 
     async handleMessageInner(
         message: string,
-        reactWithEmoji: ReactWithEmoji,
-        respondWithMessage: RespondWithMessage,
-        typingAction: TypingAction
+        safeAsyncChatActions: SafeAsyncChatActions
     ) {
+        const {reactWithEmoji, respondWithMessage, typingAction} =
+            safeAsyncChatActions;
         // TODO: do you need to await here? almost certainly not
         reactWithEmoji(IN_PROGRESS_EMOJI);
         typingAction("start_typing");
@@ -121,15 +149,17 @@ export default class MessageHandler {
             const response = await this.parseAndRun(rawPrompt);
 
             // TODO: handle errors, unit test
+            // NOTE: reacting with the emoji first is preferred, as reacting with the emoji
+            //       after sending the message results in a less useful notification on mobile devices
             if (response.status === "success") {
-                respondWithMessage(response.output);
                 reactWithEmoji(SUCCESS_EMOJI);
-            } else if (response.status === "exit") {
                 respondWithMessage(response.output);
+            } else if (response.status === "exit") {
                 reactWithEmoji(EXPECTED_EXIT_EMOJI);
+                respondWithMessage(response.output);
             } else if (response.status === "failure_safe") {
-                respondWithMessage(response.stderr);
                 reactWithEmoji(SAFE_FAILURE_EMOJI);
+                respondWithMessage(response.stderr);
             } else if (response.status === "failure_unsafe") {
                 // TODO: respond with a generic error message and link to admin contact info
                 reactWithEmoji(UNSAFE_FAILURE_EMOJI);
@@ -137,8 +167,9 @@ export default class MessageHandler {
 
             typingAction("stop_typing");
         } catch (e) {
-            await reactWithEmoji(UNSAFE_FAILURE_EMOJI);
-            await typingAction("stop_typing");
+            console.log(e);
+            reactWithEmoji(UNSAFE_FAILURE_EMOJI);
+            typingAction("stop_typing");
         }
     }
 

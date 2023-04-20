@@ -1,4 +1,2 @@
-export type RespondWithMessage =  (message: string) => Promise<void>;
-export type ReactWithEmoji = (emoji: string) => Promise<void>;
-export type TypingAction = (action: "start_typing" | "stop_typing") => Promise<void>;
-
+export function noop(..._any: any) {}
+export type TypeEquals<A, B> = A extends B ? (B extends A ? true : false) : false;

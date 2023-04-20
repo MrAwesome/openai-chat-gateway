@@ -12,6 +12,7 @@ if (SERVER_ADMIN_CONTACT_INFO === undefined) {
     process.exit(1);
 }
 
+// TODO: allow commands to override DEFAULT_OPENAI_COMPLETION_MODEL (they should already?)
 // TODO: figure out completions (complete the current text) vs. conversations
 // TODO: allow for txt attachment files to be completed/edited
 
@@ -31,6 +32,10 @@ async function getSignalInterface(): Promise<
 }
 
 (async () => {
+    process.on("unhandledRejection", (reason, promise) => {
+        console.trace("Unhandled Rejection:", promise, "Reason:", reason);
+    });
+
     const signal = await getSignalInterface();
 
     //console.log("name: ", signal.$name);
