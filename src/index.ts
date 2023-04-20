@@ -50,6 +50,7 @@ async function getSignalInterface(): Promise<
     signal.on("MessageReceivedV2", async (...args) => {
         try {
             const [timestamp, sender, groupId, message, extras] = args;
+
             const messageReceivedV2: MessageReceivedV2 = {
                 timestamp,
                 sender,
@@ -57,6 +58,8 @@ async function getSignalInterface(): Promise<
                 message,
                 extras,
             };
+
+            console.log("MessageReceivedV2: ", messageReceivedV2);
             //const attachments = messageReceivedV2.extras.attachments;
             //JSON.stringify(attachments, (_key, value) => typeof value === 'bigint' ? value.toString() : value, 2);
 
