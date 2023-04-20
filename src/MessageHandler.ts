@@ -76,17 +76,16 @@ export default class SignalMessageHandler {
             return;
         }
 
-        if (
-            ["help", "help_all", "help_unknown"].includes(
-                commandResult.resultType
-            )
+        if (commandResult.resultType === "help"
+            || commandResult.resultType === "help_all"
+            || commandResult.resultType === "help_unknown"
         ) {
             respondWithMessage(commandResult.output);
             reactWithEmoji(COMMAND_HELP_EMOJI);
             return;
         }
 
-        return await this.handleMessageInner(message, {
+        return await this.handleMessageInner(commandResult, {
             reactWithEmoji,
             respondWithMessage,
             typingAction,
@@ -127,7 +126,23 @@ export default class SignalMessageHandler {
             }
         );
 
-        return await this.handleMessageInner(message, {
+        const commandResult = handleCommands(message);
+        console.log({commandResult});
+
+        if (commandResult.resultType === "not_command") {
+            return;
+        }
+
+        if (commandResult.resultType === "help"
+            || commandResult.resultType === "help_all"
+            || commandResult.resultType === "help_unknown"
+        ) {
+            respondWithMessage(commandResult.output);
+            reactWithEmoji(COMMAND_HELP_EMOJI);
+            return;
+        }
+
+        return await this.handleMessageInner(commandResult, {
             reactWithEmoji,
             respondWithMessage,
             typingAction,
@@ -135,7 +150,10 @@ export default class SignalMessageHandler {
     }
 
     async handleMessageInner(
-        message: string,
+        commandResult: {
+            resultType: "command_success";
+            output: string;
+        },
         safeAsyncChatActions: SafeAsyncChatActions
     ) {
         const {reactWithEmoji, respondWithMessage, typingAction} =
@@ -145,7 +163,7 @@ export default class SignalMessageHandler {
         typingAction("start_typing");
 
         try {
-            const rawPrompt = message;
+            const rawPrompt = commandResult.output;
             const response = await this.parseAndRun(rawPrompt);
 
             // TODO: handle errors, unit test
