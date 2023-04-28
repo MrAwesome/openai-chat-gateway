@@ -1,3 +1,4 @@
+import dbus from "@quadratclown/dbus-next";
 import type {Variant} from "@quadratclown/dbus-next";
 
 export type SignalInterface = SignalControl &
@@ -214,9 +215,9 @@ export interface MessageReceivedV2 {
 
 interface MessageV2Extras {
   attachments?: Variant<Array<AttachmentFileInfo>>;
-  mentions?: Variant<Array<Record<string, Variant<any>>>>;
-  quote?: Variant<Record<string, Variant<any>>>;
-  reaction?: Variant<Record<string, Variant<any>>>;
+  mentions?: SignalDBUSMentionList,
+  quote?: SignalDBUSQuote,
+  reaction?: SignalDBUSReaction,
   remoteDelete?: Variant<Record<string, Variant<any>>>;
   sticker?: Variant<Record<string, Variant<any>>>;
 
@@ -224,6 +225,25 @@ interface MessageV2Extras {
   expiresInSeconds?: Variant<number>;
   isViewOnce?: Variant<boolean>;
 }
+
+export type SignalDBUSReaction = Variant<{
+    targetAuthor: Variant<string>,
+    targetSentTimestamp: Variant<number>,
+    emoji: Variant<string>,
+    isRemove: Variant<boolean>,
+}>
+
+export type SignalDBUSMentionList = Variant<Array<{
+    recipient: Variant<string>,
+    length: Variant<number>,
+    start: Variant<number>,
+}>>;
+
+export type SignalDBUSQuote = Variant<{
+    text: Variant<string>,
+    author: Variant<string>,
+    id: Variant<number>,
+}>;
 
 interface AttachmentFileInfo {
   fileName: Variant<string>;
@@ -234,4 +254,20 @@ interface AttachmentFileInfo {
   isGif: Variant<boolean>;
   contentType: Variant<string>;
   remoteId: Variant<string>;
+}
+
+
+export async function getSignalInterface(): Promise<
+    SignalInterface & dbus.ClientInterface
+> {
+    const bus = dbus.sessionBus();
+
+    // getting an object introspects it on the bus and creates the interfaces
+    const obj = await bus.getProxyObject(
+        "org.asamk.Signal",
+        "/org/asamk/Signal"
+    );
+
+    const signal = obj.getInterface("org.asamk.Signal");
+    return signal as unknown as SignalInterface & dbus.ClientInterface;
 }

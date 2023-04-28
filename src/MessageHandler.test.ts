@@ -1,6 +1,6 @@
 import {CLIRunner} from "@mrawesome/openai-cli";
 import MessageHandler from "./MessageHandler";
-import type {MessageReceivedV2, SignalInterface} from "./SignalDBUS";
+import type {MessageReceivedV2, SignalInterface} from "./signal/SignalDBUS";
 
 const mockSignalInterface = {
     sendGroupMessage: jest.fn(),

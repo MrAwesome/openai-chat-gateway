@@ -1,4 +1,5 @@
-import {MessageReceivedV2, SignalInterface} from "./SignalDBUS";
+// TODO: move logic into /signal under dedicated handlers for group/etc messages
+import {MessageReceivedV2, SignalInterface} from "./signal/SignalDBUS";
 import {CLIRunner} from "@mrawesome/openai-cli";
 import stringArgv from "string-argv";
 import {ScriptContext, ScriptReturn} from "@mrawesome/openai-cli/dist/types";
@@ -6,17 +7,11 @@ import {ScriptContext, ScriptReturn} from "@mrawesome/openai-cli/dist/types";
 import dotenv from "dotenv";
 import {handleCommands} from "./handleCommands";
 import {safeAsync, SafeAsyncChatActions} from "./handlers/types";
+import {emoji} from "./constants";
 dotenv.config();
 
 // TODO: have answers be sent as responses to the message that triggered them
 // TODO: handle emoji responses to messages
-
-const IN_PROGRESS_EMOJI = "🚬";
-const SUCCESS_EMOJI = "✅";
-const SAFE_FAILURE_EMOJI = "❌";
-const UNSAFE_FAILURE_EMOJI = "⁉️";
-const EXPECTED_EXIT_EMOJI = "🎓";
-const COMMAND_HELP_EMOJI = "📖";
 
 export default class SignalMessageHandler {
     private isGroupMessage: boolean;
@@ -41,13 +36,13 @@ export default class SignalMessageHandler {
         const respondWithMessage = safeAsync(
             prefix + "respondWithMessage",
             async (message: string) => {
-                signal.sendGroupMessage(message, [], groupId);
+                await signal.sendGroupMessage(message, [], groupId);
             }
         );
         const reactWithEmoji = safeAsync(
             prefix + "reactWithEmoji",
             async (emoji: string) => {
-                signal.sendGroupMessageReaction(
+                await signal.sendGroupMessageReaction(
                     emoji,
                     false,
                     sender,
@@ -60,7 +55,7 @@ export default class SignalMessageHandler {
             prefix + "typingAction",
             async (action: "start_typing" | "stop_typing") => {
                 const stopTyping = action !== "start_typing";
-                signal.sendGroupTyping(groupId, stopTyping);
+                return await signal.sendGroupTyping(groupId, stopTyping);
             }
         );
 
@@ -81,7 +76,7 @@ export default class SignalMessageHandler {
             || commandResult.resultType === "help_unknown"
         ) {
             respondWithMessage(commandResult.output);
-            reactWithEmoji(COMMAND_HELP_EMOJI);
+            reactWithEmoji(emoji.COMMAND_HELP);
             return;
         }
 
@@ -138,7 +133,7 @@ export default class SignalMessageHandler {
             || commandResult.resultType === "help_unknown"
         ) {
             respondWithMessage(commandResult.output);
-            reactWithEmoji(COMMAND_HELP_EMOJI);
+            reactWithEmoji(emoji.COMMAND_HELP);
             return;
         }
 
@@ -159,7 +154,7 @@ export default class SignalMessageHandler {
         const {reactWithEmoji, respondWithMessage, typingAction} =
             safeAsyncChatActions;
         // TODO: do you need to await here? almost certainly not
-        reactWithEmoji(IN_PROGRESS_EMOJI);
+        reactWithEmoji(emoji.IN_PROGRESS);
         typingAction("start_typing");
 
         try {
@@ -170,23 +165,23 @@ export default class SignalMessageHandler {
             // NOTE: reacting with the emoji first is preferred, as reacting with the emoji
             //       after sending the message results in a less useful notification on mobile devices
             if (response.status === "success") {
-                reactWithEmoji(SUCCESS_EMOJI);
+                reactWithEmoji(emoji.SUCCESS);
                 respondWithMessage(response.output);
             } else if (response.status === "exit") {
-                reactWithEmoji(EXPECTED_EXIT_EMOJI);
+                reactWithEmoji(emoji.EXPECTED_EXIT);
                 respondWithMessage(response.output);
             } else if (response.status === "failure_safe") {
-                reactWithEmoji(SAFE_FAILURE_EMOJI);
+                reactWithEmoji(emoji.SAFE_FAILURE);
                 respondWithMessage(response.stderr);
             } else if (response.status === "failure_unsafe") {
                 // TODO: respond with a generic error message and link to admin contact info
-                reactWithEmoji(UNSAFE_FAILURE_EMOJI);
+                reactWithEmoji(emoji.UNSAFE_FAILURE);
             }
 
             typingAction("stop_typing");
         } catch (e) {
             console.log(e);
-            reactWithEmoji(UNSAFE_FAILURE_EMOJI);
+            reactWithEmoji(emoji.UNSAFE_FAILURE);
             typingAction("stop_typing");
         }
     }
