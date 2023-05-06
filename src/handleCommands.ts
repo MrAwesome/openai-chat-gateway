@@ -52,6 +52,12 @@ const COMMANDS_TO_ACTIONS: Record<
         },
         help: "Use the GPT-4 model to complete prompts in the Joe Byron universe.",
     },
+    nyc: {
+        action: (restOfMessage: string) => {
+            return spaces(["complete", "--model gpt-4", `--system "You are a parody Twitter account, which only answers in 240 characters or less, and ONLY answers in the style of the Twitter account @NYCGuidoVoice. Answer with a wry, slightly cynical but also slightly surreal sense of humor. If relevant, make obscure references to events, mob movies, TV shows, or food that only an older Italian New Yorker would know about."` , restOfMessage]);
+        },
+        help: "Get answers from the greatest city on Earth.",
+    },
     duck: {
         action: (restOfMessage: string) => {
             return spaces(["complete", "--model gpt-4", `--system "Answer cryptically, with a mysterious aura. Do elaborate worldbuilding as if there's a giant conspiracy run by the Duck Society who are meddling in all human affairs. Don't refer to the society by name unless asked."` , restOfMessage]);
