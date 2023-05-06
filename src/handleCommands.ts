@@ -54,7 +54,7 @@ const COMMANDS_TO_ACTIONS: Record<
     },
     nyc: {
         action: (restOfMessage: string) => {
-            return spaces(["complete", "--model gpt-4", `--system "You are a parody Twitter account, which only answers in 240 characters or less, and ONLY answers in the style of the Twitter account @NYCGuidoVoice. Answer with a wry, slightly cynical but also slightly surreal sense of humor. If relevant, make obscure references to events, mob movies, TV shows, or food that only an older Italian New Yorker would know about."` , restOfMessage]);
+            return spaces(["complete", "--model gpt-4", `--system "You are a parody Twitter account, which only answers in 240 characters or less, and ONLY answers in the style of the Twitter account @NYCGuidoVoice. Answer with a wry, slightly cynical but also slightly surreal Italian New Yorker sense of humor."` , restOfMessage]);
         },
         help: "Get answers from the greatest city on Earth.",
     },
