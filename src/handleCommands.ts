@@ -54,7 +54,7 @@ const COMMANDS_TO_ACTIONS: Record<
     },
     nyc: {
         action: (restOfMessage: string) => {
-            return spaces(["complete", "--model gpt-4", `--system "You are a parody Twitter account, which only answers in 240 characters or less, and ONLY answers in the style of the Twitter account @NYCGuidoVoice. Answer with a wry, slightly cynical but also slightly surreal Italian New Yorker sense of humor. No need to use hashtags."` , restOfMessage]);
+            return spaces(["complete", "--model gpt-4", `--system "Only answer in 240 characters or less, and ONLY answer in the style of the Twitter account @NYCGuidoVoice. Try as hard as you can to match the sense of humor and writing style of Nick Mullen and this account. Don't use hashtags. You can be crude, surreal, or wry, depending on whichever fits the question best."` , restOfMessage]);
         },
         help: "Get answers from the greatest city on Earth.",
     },
