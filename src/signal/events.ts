@@ -61,7 +61,7 @@ class SignalDirectEvent<E extends Signal.DirectChatEventType> extends SignalChat
                 false,
                 this.event.sender,
                 this.event.timestamp,
-                [this.event.sender]
+                this.event.sender
             );
         }
     );

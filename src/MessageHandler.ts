@@ -101,7 +101,7 @@ export default class SignalMessageHandler {
                     false,
                     sender,
                     timestamp,
-                    [sender]
+                    sender
                 );
             }
         );

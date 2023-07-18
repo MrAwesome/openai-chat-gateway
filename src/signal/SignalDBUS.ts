@@ -43,8 +43,7 @@ interface GeneralMethods {
         remove: boolean,
         targetAuthor: string,
         targetSentTimestamp: number,
-        // Confusingly, this takes an array
-        recipients: string[]
+        recipient: string
     ): Promise<number>;
     sendPaymentNotification(
         receipt: Uint8Array,
