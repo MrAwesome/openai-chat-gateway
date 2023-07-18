@@ -49,7 +49,7 @@ class SignalDirectEvent<E extends Signal.DirectChatEventType> extends SignalChat
     sendMessage = this.safeAsync(
         "sendMessage",
         async (message: string) => {
-            return await this.signal.sendMessage(message, [], this.event.sender);
+            return await this.signal.sendMessage(message, [], [this.event.sender]);
         }
     );
 
@@ -61,7 +61,7 @@ class SignalDirectEvent<E extends Signal.DirectChatEventType> extends SignalChat
                 false,
                 this.event.sender,
                 this.event.timestamp,
-                this.event.sender
+                [this.event.sender]
             );
         }
     );

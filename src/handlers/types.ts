@@ -8,9 +8,10 @@ export function safeAsync<A extends KnownMessageActionTypes>(name: string, fn: A
     return x as SafeAsyncAction<A>;
 }
 
-export type ReactWithEmoji = (emoji: string) => Promise<number>;
-export type SendMessage = (message: string) => Promise<void>;
-export type TypingAction = (action: "start_typing" | "stop_typing") => Promise<void>;
+// TODO: type these correctly
+export type ReactWithEmoji = (emoji: string) => Promise<any>;
+export type SendMessage = (message: string) => Promise<any>;
+export type TypingAction = (action: "start_typing" | "stop_typing") => Promise<any>;
 export type KnownMessageActionTypes = ReactWithEmoji | SendMessage | TypingAction;
 
 // SafeAsyncAction simply extends any type in KnownMessageActionTypes with a boolean property:

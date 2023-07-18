@@ -36,14 +36,14 @@ interface GeneralMethods {
     sendMessage(
         message: string,
         attachments: string[],
-        recipient: string | string[]
+        recipients: string[]
     ): Promise<number>;
     sendMessageReaction(
         emoji: string,
         remove: boolean,
         targetAuthor: string,
         targetSentTimestamp: number,
-        recipient: string | string[]
+        recipients: string[]
     ): Promise<number>;
     sendPaymentNotification(
         receipt: Uint8Array,
