@@ -26,6 +26,7 @@ const COMMANDS_TO_ACTIONS: Record<
     }
 > = {
     gpt: doDefault,
+    bot: doDefault,
     complete: doDefault,
     ask: doDefault,
     gpt4: {
