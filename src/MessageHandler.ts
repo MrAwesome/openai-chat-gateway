@@ -109,7 +109,7 @@ export default class SignalMessageHandler {
         const respondWithMessage = safeAsync(
             prefix + "respondWithMessage",
             async (message: string) => {
-                signal.sendMessage(message, [], sender);
+                signal.sendMessage(message, [], [sender]);
             }
         );
 

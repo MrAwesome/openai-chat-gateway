@@ -36,7 +36,7 @@ interface GeneralMethods {
     sendMessage(
         message: string,
         attachments: string[],
-        recipient: string
+        recipient: string[]
     ): Promise<number>;
     sendMessageReaction(
         emoji: string,
