@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "@mrawesome/openai-cli": "^0.1.96",
+        "@mrawesome/openai-cli": "^0.1.97",
         "@quadratclown/dbus-next": "^1.0.2",
         "dotenv": "^16.0.3",
         "openai": "^3.1.0",

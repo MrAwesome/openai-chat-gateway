@@ -551,10 +551,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@mrawesome/openai-cli@^0.1.96":
-  version "0.1.96"
-  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.96.tgz#a7cab2a8193dd7abb1811dd6f74d58f94595576c"
-  integrity sha512-f3TNcWLKj9xmnLXtwOAOs99gDH3EWI590sEZ6Pu1NY2Kfc57b65AUDMUR6tpiBS3CVORCe6PEWmwoiOgIkGGfg==
+"@mrawesome/openai-cli@^0.1.97":
+  version "0.1.97"
+  resolved "https://registry.yarnpkg.com/@mrawesome/openai-cli/-/openai-cli-0.1.97.tgz#dd87d1b8e69646aefde1acf53076158227c2e1ba"
+  integrity sha512-C15sGYCgKo0oKMVllgE90sLvHhYQAdOcaQ5mOvYmZ8UW5cKvtfYf6jFiSK7ISK9S/AgCRARVxLWIE1lnq/M+6Q==
   dependencies:
     "@types/node" "^18.11.18"
     commander "^10.0.0"
